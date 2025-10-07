@@ -21,4 +21,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "ru.mirea.Borlykova.calendarApp"
 include(":app")
- 
+include(":data")
+include(":domain")

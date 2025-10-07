@@ -1,3 +1,13 @@
 <resources>
     <string name="app_name">ru.mirea.Borlykova.calendarApp</string>
+    <string name="email">Email</string>
+    <string name="password">Пароль</string>
+    <string name="Login">Войти</string>
+    <string name="Signin">Регистрация</string>
+    <string name="mainCalendarScreen">Главная страница календаря</string>
+    <string name="Logout">Выйти из аккаунта</string>
+    <string name="Events">События</string>
+    <string name="Title">Название</string>
+    <string name="Date">Дата</string>
+    <string name="Description">Описание</string>
 </resources>
