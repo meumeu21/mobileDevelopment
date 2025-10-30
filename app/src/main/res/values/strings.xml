@@ -10,4 +10,5 @@
     <string name="Title">Название</string>
     <string name="Date">Дата</string>
     <string name="Description">Описание</string>
+    <string name="update">Обновить</string>
 </resources>

@@ -21,10 +21,17 @@
         android:textSize="22sp"
         android:padding="16dp" />
 
+    <Button
+        android:id="@+id/btnRefresh"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/update"
+        android:layout_margin="8dp" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvEvents"
         android:layout_width="match_parent"
-        android:layout_height="426dp"
+        android:layout_height="253dp"
         android:padding="8dp" />
 
     <Button

@@ -1,7 +1,6 @@
 package com.example.rumireaborlykovacalendarapp.presentation;
 
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
@@ -10,57 +9,52 @@ import android.util.Log;
 import com.example.rumireaborlykovacalendarapp.domain.models.Event;
 import com.example.rumireaborlykovacalendarapp.domain.repository.EventRepository;
 
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class MainViewModel extends ViewModel {
 
     private final EventRepository eventRepository;
-
-    private final MutableLiveData<List<Event>> localEvents = new MutableLiveData<>();
-    private final MutableLiveData<List<Event>> networkEvents = new MutableLiveData<>();
-
-    private final MediatorLiveData<List<Event>> combinedEvents = new MediatorLiveData<>();
+    private final MutableLiveData<List<Event>> eventsLiveData = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> isLoading = new MutableLiveData<>();
+    private final MutableLiveData<String> errorMessage = new MutableLiveData<>();
 
     public MainViewModel(EventRepository eventRepository) {
         this.eventRepository = eventRepository;
         Log.d("MainViewModel", "MainViewModel created");
-
-        loadLocalEvents();
-        loadNetworkEvents();
-
-        combinedEvents.addSource(localEvents, local -> combineData(local, networkEvents.getValue()));
-        combinedEvents.addSource(networkEvents, network -> combineData(localEvents.getValue(), network));
+        loadEvents();
     }
 
-    private void loadLocalEvents() {
+    public void loadEvents() {
+        isLoading.setValue(true);
+
         try {
             List<Event> events = eventRepository.getEvents();
-            localEvents.setValue(events);
-            Log.d("MainViewModel", "Loaded local events: " + events.size());
+            eventsLiveData.setValue(events);
+            Log.d("MainViewModel", "Loaded events: " + events.size());
+            errorMessage.setValue(null);
         } catch (Exception e) {
-            Log.e("MainViewModel", "Error loading local events", e);
+            Log.e("MainViewModel", "Error loading events", e);
+            errorMessage.setValue("Ошибка загрузки событий");
+            eventsLiveData.setValue(null);
+        } finally {
+            isLoading.setValue(false);
         }
     }
 
-    private void loadNetworkEvents() {
-        List<Event> mockNetworkEvents = new ArrayList<>();
-        mockNetworkEvents.add(new Event(101, "Online meeting", new Date(), "Remote sync with team"));
-        mockNetworkEvents.add(new Event(102, "Conference stream", new Date(), "Streaming tech talk online"));
-        networkEvents.setValue(mockNetworkEvents);
-        Log.d("MainViewModel", "Loaded mock network events: " + mockNetworkEvents.size());
+    public LiveData<List<Event>> getEvents() {
+        return eventsLiveData;
     }
 
-    private void combineData(List<Event> local, List<Event> network) {
-        List<Event> result = new ArrayList<>();
-        if (local != null) result.addAll(local);
-        if (network != null) result.addAll(network);
-        combinedEvents.setValue(result);
+    public LiveData<Boolean> getIsLoading() {
+        return isLoading;
     }
 
-    public LiveData<List<Event>> getCombinedEvents() {
-        return combinedEvents;
+    public LiveData<String> getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void refreshEvents() {
+        loadEvents();
     }
 
     @Override

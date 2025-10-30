@@ -56,6 +56,12 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
         return events != null ? events.size() : 0;
     }
 
+    public void updateEvents(List<Event> events) {
+        this.events.clear();
+        this.events.addAll(events);
+        notifyDataSetChanged();
+    }
+
     static class EventViewHolder extends RecyclerView.ViewHolder {
         TextView tvEventTitle, tvEventDescription, tvEventDate;
 
