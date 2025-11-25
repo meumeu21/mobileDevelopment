@@ -6,140 +6,110 @@ import androidx.room.Room;
 
 import com.example.rumireaborlykovacalendarapp.data.local.AppDatabase;
 import com.example.rumireaborlykovacalendarapp.data.local.entities.EventEntity;
-import com.example.rumireaborlykovacalendarapp.data.remote.NetworkApi;
-import com.example.rumireaborlykovacalendarapp.data.stub.StubDataRepository;
 import com.example.rumireaborlykovacalendarapp.domain.models.Event;
 import com.example.rumireaborlykovacalendarapp.domain.repository.EventRepository;
+import static com.example.rumireaborlykovacalendarapp.data.local.mappers.EventMapper.*;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
 public class EventRepositoryImpl implements EventRepository {
 
-    private final AppDatabase database;
-    private final StubDataRepository stubDataRepository;
+    private final AppDatabase db;
+    private final int userId;
 
-    public EventRepositoryImpl(Context context) {
-        database = Room.databaseBuilder(context, AppDatabase.class, "calendar_db")
-                .allowMainThreadQueries()
-                .build();
-
-        stubDataRepository = StubDataRepository.getInstance();
+    public EventRepositoryImpl(Context context, int userId) {
+        this.userId = userId;
+        this.db = AppDatabase.getInstance(context);
     }
 
     @Override
     public List<Event> getEventsForDate(Date date) {
-        List<Event> allEvents = getEvents();
-        List<Event> filteredEvents = new ArrayList<>();
+        Date normalized = normalizeDate(date);
 
-        for (Event event : allEvents) {
-            if (isSameDay(event.getDate(), date)) {
-                filteredEvents.add(event);
-            }
-        }
-        return filteredEvents;
+        long start = normalized.getTime();
+        long end = start + 24 * 60 * 60 * 1000 - 1;
+
+        System.out.println("DEBUG: Поиск событий в диапазоне: " + new Date(start) + " - " + new Date(end));
+
+        List<EventEntity> entities = db.eventDao().getEventsOn(start, end, userId);
+
+        System.out.println("DEBUG: Найдено событий: " + entities.size());
+
+        return toDomainList(entities);
     }
 
-    @Override
-    public List<Event> getUpcomingEvents() {
-        List<Event> allEvents = getEvents();
-        List<Event> upcomingEvents = new ArrayList<>();
-        Date now = new Date();
 
-        for (Event event : allEvents) {
-            if (event.getDate().after(now)) {
-                upcomingEvents.add(event);
-            }
-        }
-        return upcomingEvents;
+    @Override
+    public List<Event> getEvents() {
+        System.out.println("DEBUG: Запрос всех событий пользователя: " + userId);
+        List<EventEntity> entities = db.eventDao().getAllEvents(userId);
+        System.out.println("DEBUG: Всего событий в БД: " + entities.size());
+        return toDomainList(entities);
     }
 
     @Override
     public Event getSpecificEvent(String id) {
-        try {
-            int eventId = Integer.parseInt(id);
-            return stubDataRepository.getEventById(eventId);
-        } catch (NumberFormatException e) {
-            return null;
-        }
+        return toDomain(db.eventDao().getEvent(Integer.parseInt(id), userId));
     }
 
     @Override
-    public Event createEvent(String title, Date date) {
-        List<Event> existingEvents = getEvents();
-        int maxId = 0;
-        for (Event event : existingEvents) {
-            if (event.getId() != null && event.getId() > maxId) {
-                maxId = event.getId();
-            }
-        }
+    public Event createEvent(String title, Date date, int startHour, int startMinute,
+                             int endHour, int endMinute, boolean notify, int groupId,
+                             String description) {
+        date = normalizeDate(date);
+        EventEntity e = new EventEntity();
+        e.title = title;
+        e.date = date;
+        e.startHour = startHour;
+        e.startMinute = startMinute;
+        e.endHour = endHour;
+        e.endMinute = endMinute;
+        e.notify = notify;
+        e.groupId = groupId;
+        e.description = description;
+        e.userId = userId;
 
-        Event newEvent = new Event(maxId + 1, title, date, "Новое событие");
-        addEvent(newEvent);
-        return newEvent;
+        long newId = db.eventDao().insert(e);
+        e.id = (int) newId;
+        return toDomain(e);
     }
 
-    @Override
     public Event updateEvent(Event event) {
+        db.eventDao().update(
+                event.getId(),
+                event.getTitle(),
+                event.getDate(),
+                event.getStartHour(),
+                event.getStartMinute(),
+                event.getEndHour(),
+                event.getEndMinute(),
+                event.isNotify(),
+                event.getGroupId(),
+                event.getDescription(),
+                userId
+        );
+
         return event;
     }
 
     @Override
     public void deleteEvent(String id) {
+        db.eventDao().delete(Integer.parseInt(id), userId);
     }
 
-    @Override
-    public List<Event> getEvents() {
-         return stubDataRepository.getStubEvents();
+    private Date normalizeDate(Date date) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
 
-//        List<EventEntity> local = database.eventDao().getAllEvents();
-//        if (!local.isEmpty()) {
-//            List<Event> events = new ArrayList<>();
-//            for (EventEntity e : local) {
-//                events.add(new Event(e.id, e.title, e.date, e.description));
-//            }
-//            return events;
-//        }
-//
-//        List<Event> stubEvents = stubDataRepository.getStubEvents();
-//
-//        for (Event event : stubEvents) {
-//            database.eventDao().insert(new EventEntity(
-//                event.getTitle(),
-//                event.getDate(),
-//                event.getDescription()
-//            ));
-//        }
-//
-//        return stubEvents;
-    }
+        Date normalized = cal.getTime();
+        System.out.println("DEBUG: Нормализация даты: " + date + " -> " + normalized);
 
-    @Override
-    public void addEvent(Event event) {
-        database.eventDao().insert(new EventEntity(
-                event.getTitle(),
-                event.getDate(),
-                event.getDescription()
-        ));
-    }
-
-    @Override
-    public void clearEvents() {
-        database.eventDao().clearAll();
-    }
-
-    private boolean isSameDay(Date date1, Date date2) {
-        if (date1 == null || date2 == null) return false;
-
-        java.util.Calendar cal1 = java.util.Calendar.getInstance();
-        java.util.Calendar cal2 = java.util.Calendar.getInstance();
-        cal1.setTime(date1);
-        cal2.setTime(date2);
-
-        return cal1.get(java.util.Calendar.YEAR) == cal2.get(java.util.Calendar.YEAR) &&
-                cal1.get(java.util.Calendar.MONTH) == cal2.get(java.util.Calendar.MONTH) &&
-                cal1.get(java.util.Calendar.DAY_OF_MONTH) == cal2.get(java.util.Calendar.DAY_OF_MONTH);
+        return normalized;
     }
 }

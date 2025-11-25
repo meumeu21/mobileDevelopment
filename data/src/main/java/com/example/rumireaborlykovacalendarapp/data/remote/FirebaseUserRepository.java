@@ -1,4 +1,4 @@
-package com.example.rumireaborlykovacalendarapp.data;
+package com.example.rumireaborlykovacalendarapp.data.remote;
 
 import com.example.rumireaborlykovacalendarapp.domain.repository.UserRepository;
 import com.google.firebase.auth.FirebaseAuth;

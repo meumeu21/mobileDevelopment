@@ -1,4 +1,4 @@
-package com.example.rumireaborlykovacalendarapp.presentation;
+package com.example.rumireaborlykovacalendarapp.presentation.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -9,7 +9,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.rumireaborlykovacalendarapp.R;
-import com.example.rumireaborlykovacalendarapp.data.FirebaseUserRepository;
+import com.example.rumireaborlykovacalendarapp.data.remote.FirebaseUserRepository;
 import com.example.rumireaborlykovacalendarapp.domain.repository.UserRepository;
 import com.example.rumireaborlykovacalendarapp.domain.usecases.LoginUser;
 import com.example.rumireaborlykovacalendarapp.domain.usecases.RegisterUser;
@@ -34,10 +34,14 @@ public class AuthActivity extends AppCompatActivity {
 
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
-            startActivity(new Intent(this, MainActivity.class));
+            String userId = currentUser.getUid();
+            Intent intent = new Intent(this, MainActivity.class);
+            intent.putExtra("USER_ID", userId);
+            startActivity(intent);
             finish();
             return;
         }
+
 
         emailEditText = findViewById(R.id.etEmail);
         passwordEditText = findViewById(R.id.etPassword);
@@ -64,9 +68,17 @@ public class AuthActivity extends AppCompatActivity {
         loginUserUseCase.execute(email, password, new UserRepository.AuthCallback() {
             @Override
             public void onSuccess() {
-                Toast.makeText(AuthActivity.this, "Вход выполнен!", Toast.LENGTH_SHORT).show();
-                startActivity(new Intent(AuthActivity.this, MainActivity.class));
-                finish();
+                FirebaseUser currentUser = mAuth.getCurrentUser();
+                if (currentUser != null) {
+                    String userId = currentUser.getUid();
+
+                    Toast.makeText(AuthActivity.this, "Вход выполнен!", Toast.LENGTH_SHORT).show();
+
+                    Intent intent = new Intent(AuthActivity.this, MainActivity.class);
+                    intent.putExtra("USER_ID", userId);
+                    startActivity(intent);
+                    finish();
+                }
             }
 
             @Override
@@ -88,9 +100,17 @@ public class AuthActivity extends AppCompatActivity {
         registerUserUseCase.execute(email, password, new UserRepository.AuthCallback() {
             @Override
             public void onSuccess() {
-                Toast.makeText(AuthActivity.this, "Регистрация успешна!", Toast.LENGTH_SHORT).show();
-                startActivity(new Intent(AuthActivity.this, MainActivity.class));
-                finish();
+                FirebaseUser currentUser = mAuth.getCurrentUser();
+                if (currentUser != null) {
+                    String userId = currentUser.getUid();
+
+                    Toast.makeText(AuthActivity.this, "Регистрация успешна!", Toast.LENGTH_SHORT).show();
+
+                    Intent intent = new Intent(AuthActivity.this, MainActivity.class);
+                    intent.putExtra("USER_ID", userId);
+                    startActivity(intent);
+                    finish();
+                }
             }
 
             @Override

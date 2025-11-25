@@ -7,4 +7,14 @@ import java.util.Date;
 import java.util.List;
 
 public class GetEventsForDate {
+
+    private final EventRepository repository;
+
+    public GetEventsForDate(EventRepository repository) {
+        this.repository = repository;
+    }
+
+    public List<Event> execute(Date date) {
+        return repository.getEventsForDate(date);
+    }
 }

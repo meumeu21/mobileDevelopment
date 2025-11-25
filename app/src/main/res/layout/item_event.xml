@@ -1,31 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
+    android:background="@drawable/event_item_background"
     android:padding="12dp"
-    android:background="?android:attr/selectableItemBackground">
+    android:layout_marginBottom="8dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="4dp">
+
+        <TextView
+            android:id="@+id/tvEventTime"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="10:00 - 11:30"
+            android:textSize="12sp"
+            android:textColor="#666666"
+            android:textStyle="bold" />
+
+    </LinearLayout>
 
     <TextView
         android:id="@+id/tvEventTitle"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/Title"
+        android:text="Название события"
+        android:textSize="14sp"
         android:textStyle="bold"
-        android:textSize="18sp" />
+        android:layout_marginBottom="2dp" />
 
     <TextView
         android:id="@+id/tvEventDescription"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/Description"
-        android:textSize="14sp"
-        android:textColor="#666" />
+        android:text="Описание события которое может быть длинным и обрезаться..."
+        android:textSize="12sp"
+        android:textColor="#666666" />
 
-    <TextView
-        android:id="@+id/tvEventDate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/Date"
-        android:textSize="14sp"
-        android:textColor="#999" />
+    <ImageView
+        android:id="@+id/ivEventImage"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="12dp"
+        android:scaleType="centerCrop"
+        android:background="@drawable/rounded_image_background" />
+
 </LinearLayout>

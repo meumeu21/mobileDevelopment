@@ -55,4 +55,7 @@ dependencies {
     annotationProcessor(libs.androidx.room.compiler)
     implementation(libs.androidx.appcompat.v170)
     implementation(libs.material.v1120)
+    implementation(libs.material.v160)
+    implementation(libs.picasso)
+
 }

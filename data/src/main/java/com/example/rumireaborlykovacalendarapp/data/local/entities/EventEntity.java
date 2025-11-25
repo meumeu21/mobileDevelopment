@@ -6,15 +6,21 @@ import java.util.Date;
 
 @Entity(tableName = "events")
 public class EventEntity {
+
     @PrimaryKey(autoGenerate = true)
     public int id;
+
     public String title;
     public Date date;
-    public String description;
 
-    public EventEntity(String title, Date date, String description) {
-        this.title = title;
-        this.date = date;
-        this.description = description;
-    }
+    public int startHour;
+    public int startMinute;
+    public int endHour;
+    public int endMinute;
+
+    public boolean notify;
+
+    public int groupId;
+    public int userId;
+    public String description;
 }
